@@ -29,24 +29,38 @@
   nextBtn.addEventListener("click", () => {
     nextSong();
   });
- async function nextSong() {
+  function nextSong() {
     songCount++;
     if (songCount > 3) songCount = 0;
-   await audio.setAttribute("src", `audio/${songSre[songCount]}`);
-   await audio.pause();
-   await audio.play();
-    playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
-    play = true;
+    audio.setAttribute("src", `audio/${songSre[songCount]}`);
+    audio.pause();
+    audio
+      .play()
+      .then(() => {
+        playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+        play = true;
+      })
+      .catch((e) => {
+        //console.log(e);
+      });
   }
   prevBtn.addEventListener("click", () => {
     prevSong();
   });
-  async function prevSong() {
+  function prevSong() {
     songCount--;
     if (songCount < 0) songCount = songSre.length - 1;
-   await audio.setAttribute("src", `audio/${songSre[songCount]}`);
-   await audio.pause();
-   await audio.play();
+    audio.setAttribute("src", `audio/${songSre[songCount]}`);
+    audio.pause();
+    audio
+      .play()
+      .then(() => {
+        playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+        play = true;
+      })
+      .catch((e) => {
+        //console.log(e);
+      });
     playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
     play = true;
   }
@@ -109,7 +123,6 @@
   });
   function drawAnimation() {
     requestAnimationFrame(drawAnimation);
-
     const bufferLenght = analyserNode.frequencyBinCount;
     const dataArry = new Uint8Array(bufferLenght);
     analyserNode.getByteFrequencyData(dataArry);
