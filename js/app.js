@@ -1,8 +1,7 @@
 //Adding controls functionality
 (() => {
-  const playBtn = document.querySelector(".play-pause_btn");
-  const audio = document.querySelector("audio");
   // Creating dynamic song name
+  const audio = document.querySelector("audio");
   const songNameContainer = document.querySelector("#song-name");
   let marquee = document.createElement("marquee");
   let audioSrcMarquee = audio.src.match("mixkit-hazy-after-hours-132.mp3");
@@ -11,16 +10,47 @@
   marquee.style.padding = "10px";
   marquee.style.color = "#fff";
   songNameContainer.append(marquee);
+  // Play and pause buttons functionality
   let play = false;
-  function playAndPause() {
+  const playBtn = document.querySelector(".play-pause_btn");
+  playBtn.addEventListener("click", () => {
+    if (play === false) {
+      audio.play();
+      playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+      marquee.start();
+      play = true;
+    } else {
+      audio.pause();
+      playBtn.innerHTML = `<i class="fa fa-play" aria-hidden="true"></i>`;
+      marquee.stop();
+      play = false;
+    }
+  });
+  function removeAnimation(animatedDiv) {
+    if (animatedDiv) {
+      playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+      visualizer.style.display = "block";
+      animatedDiv.remove();
+    } else {
+      return;
+    }
+  }
+
+  function playAndPause(animatedDiv) {
+    if(audio.src.match('undefined')){
+      audio.setAttribute("src","audio/mixkit-hazy-after-hours-132.mp3")
+      marquee.innerText = "mixkit-hazy-after-hours-132.mp3"
+    }
     if (play === false) {
       audio.play().then(async () => {
         if (context.state == "suspended") {
           await context.resume();
           playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          removeAnimation(animatedDiv);
           play = true;
         } else {
           playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          removeAnimation(animatedDiv);
           play = true;
         }
       });
@@ -30,9 +60,13 @@
         if (context.state == "suspended") {
           await context.resume();
           playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          removeAnimation(animatedDiv);
           play = true;
         } else {
           playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
+          removeAnimation(animatedDiv);
           play = true;
         }
       });
@@ -76,45 +110,30 @@
           });
           li.addEventListener("click", (e) => {
             audio.setAttribute("src", `audio/${e.target.textContent}`);
+            let animatedDiv = document.createElement("div");
+            let x = document.querySelector(".left-side");
+            visualizer.style.display = "none";
+            animatedDiv.classList.add("laoding-animation");
+            x.append(animatedDiv);
             marquee.textContent = e.target.textContent;
             songs.forEach((song, index) => {
               if (e.target.innerHTML.includes(song.name)) {
                 audio.setAttribute("src", song.data);
               }
             });
-            playAndPause();
+            playAndPause(animatedDiv);
           });
         });
         screen.append(ul);
       });
   }
-  // Play and pause buttons functionality
-  playBtn.addEventListener("click", () => {
-    if (play === false) {
-      audio.play();
-      playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
-      marquee.start();
-      play = true;
-    } else {
-      audio.pause();
-      playBtn.innerHTML = `<i class="fa fa-play" aria-hidden="true"></i>`;
-      marquee.stop();
-      play = false;
-    }
-  });
-  // adding next and previous funtionality
-  const nextBtn = document.querySelector(".next-btn");
-  const prevBtn = document.querySelector(".prev-btn");
+  // Adding next and previous funtionality
   let songList = [
     "mixkit-hazy-after-hours-132.mp3",
     "mixkit-hip-hop-02-738.mp3",
-    "mixkit-raising-me-higher-34.mp3",
-    "mixkit-tech-house-vibes-130.mp3",
   ];
-  // On load storing song data into song list
-  window.onload = () => {
-    onload();
-  };
+  const nextBtn = document.querySelector(".next-btn");
+  const prevBtn = document.querySelector(".prev-btn");
   let songCount = 0;
   // Next button event
   nextBtn.addEventListener("click", () => {
@@ -128,6 +147,11 @@
       .get()
       .then((songs) => {
         audio.setAttribute("src", `audio/${songList[songCount]}`);
+        let animatedDiv = document.createElement("div");
+        let x = document.querySelector(".left-side");
+        visualizer.style.display = "none";
+        animatedDiv.classList.add("laoding-animation");
+        x.append(animatedDiv);
         songs.forEach((song, index) => {
           if (song.name.includes(songList[songCount])) {
             audio.setAttribute("src", song.data);
@@ -136,7 +160,7 @@
         songNameContainer.innerHTML = "";
         marquee.innerText = songList[songCount];
         songNameContainer.append(marquee);
-        playAndPause();
+        playAndPause(animatedDiv);
       });
   }
   // Prev button event
@@ -151,6 +175,11 @@
       .get()
       .then((songs) => {
         audio.setAttribute("src", `audio/${songList[songCount]}`);
+        let animatedDiv = document.createElement("div");
+        let x = document.querySelector(".left-side");
+        visualizer.style.display = "none";
+        animatedDiv.classList.add("laoding-animation");
+        x.append(animatedDiv);
         songs.forEach((song, index) => {
           if (song.name.includes(songList[songCount])) {
             audio.setAttribute("src", song.data);
@@ -159,9 +188,13 @@
         songNameContainer.innerHTML = "";
         marquee.textContent = songList[songCount];
         songNameContainer.append(marquee);
-        playAndPause();
+        playAndPause(animatedDiv);
       });
   }
+  // On load storing song data into song list
+  window.onload = () => {
+    onload();
+  };
   // Adding volume functionality
   const volumeBar = document.querySelector("#volume");
   audio.volume = 0.3;
@@ -262,19 +295,23 @@
           .doc({ name: inpFile.files[0].name })
           .get()
           .then((song) => {
+            let animatedDiv = document.createElement("div");
+            let x = document.querySelector(".left-side");
+            visualizer.style.display = "none";
+            animatedDiv.classList.add("laoding-animation");
+            x.append(animatedDiv);
             if (typeof song !== "undefined") {
               audio.setAttribute("src", song.data);
               marquee.textContent = inpFile.files[0].name;
               inpFile.value = null;
-              playAndPause();
-              return;
+              playAndPause(animatedDiv);
             } else {
               const fileReader = new FileReader();
               fileReader.readAsDataURL(inpFile.files[0]);
               fileReader.onload = (e) => {
                 audio.setAttribute("src", e.currentTarget.result);
                 songList.push(inpFile.files[0].name);
-                playAndPause();
+                playAndPause(animatedDiv);
                 db.collection("songs").add({
                   name: inpFile.files[0].name,
                   data: e.currentTarget.result,
@@ -304,13 +341,9 @@
                     songList.filter((item) => {
                       return item !== song;
                     });
-
                     delete songList[index];
-
                     songList.pop();
-
                     inpFile.files[0].name = "";
-
                     removeBtn.previousElementSibling.remove();
                     removeBtn.remove();
                   });
@@ -322,13 +355,18 @@
                           "src",
                           `audio/${e.target.textContent}`
                         );
+                        let animatedDiv = document.createElement("div");
+                        let x = document.querySelector(".left-side");
+                        visualizer.style.display = "none";
+                        animatedDiv.classList.add("laoding-animation");
+                        x.append(animatedDiv);
                         marquee.textContent = e.target.textContent;
                         song.forEach((song, index) => {
                           if (e.target.innerHTML.includes(song.name)) {
                             audio.setAttribute("src", song.data);
                           }
                         });
-                        playAndPause();
+                        playAndPause(animatedDiv);
                       });
                   });
                 });
