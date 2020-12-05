@@ -49,23 +49,43 @@
           }
         });
         let screen = document.querySelector("#song-option");
-        let ul = document.createElement("ul"); 
+        let ul = document.createElement("ul");
         songList.forEach((song, index) => {
           let li = document.createElement("li");
           li.textContent = song;
+          let removeBtn = document.createElement("button");
+          removeBtn.innerHTML = `<i class="fa fa-trash" aria-hidden="true"></i>`;
           ul.append(li);
+          ul.append(removeBtn);
+          removeBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            db.collection("songs")
+              .doc({ name: song })
+              .delete()
+              .then((e) => {
+                console.log("delete");
+              })
+              .catch((e) => {});
+
+            delete songList[index];
+
+            songList.pop();
+
+            removeBtn.previousElementSibling.remove();
+            removeBtn.remove();
+          });
+          li.addEventListener("click", (e) => {
+            audio.setAttribute("src", `audio/${e.target.textContent}`);
+            marquee.textContent = e.target.textContent;
+            songs.forEach((song, index) => {
+              if (e.target.innerHTML.includes(song.name)) {
+                audio.setAttribute("src", song.data);
+              }
+            });
+            playAndPause();
+          });
         });
         screen.append(ul);
-        ul.addEventListener("click", (e) => {
-          audio.setAttribute("src", `audio/${e.target.innerHTML}`);
-          marquee.textContent = e.target.innerHTML;
-          songs.forEach((song, index) => {
-            if (e.target.innerHTML.includes(song.name)) {
-              audio.setAttribute("src", song.data);
-            }
-          });
-          playAndPause();
-        });
       });
   }
   // Play and pause buttons functionality
@@ -95,8 +115,6 @@
   window.onload = () => {
     onload();
   };
-
-  // songList.push(Object.keys(items))
   let songCount = 0;
   // Next button event
   nextBtn.addEventListener("click", () => {
@@ -242,35 +260,81 @@
         let songName = await db
           .collection("songs")
           .doc({ name: inpFile.files[0].name })
-          .get();
-        if (songName) {
-          audio.setAttribute("src", songName.data);
-          marquee.textContent = inpFile.files[0].name;
-          inpFile.value = null;
-          playAndPause();
-          return;
-        } else {
-          const fileReader = new FileReader();
-          fileReader.readAsDataURL(inpFile.files[0]);
-          fileReader.onload = (e) => {
-            audio.setAttribute("src", e.currentTarget.result);
-            songList.push(inpFile.files[0].name)
-            playAndPause();
-            db.collection("songs").add({
-              name: inpFile.files[0].name,
-              data: e.currentTarget.result,
-            });
-            let screen = document.querySelector("#song-option")
-            let ul = document.createElement("ul")
-            screen.innerHTML = ''
-            screen.append(ul)
-            songList.forEach(song => {
-              let li = document.createElement("li")
-              li.textContent = song
-              ul.append(li)
-            });
-          };
-        }
+          .get()
+          .then((song) => {
+            if (typeof song !== "undefined") {
+              audio.setAttribute("src", song.data);
+              marquee.textContent = inpFile.files[0].name;
+              inpFile.value = null;
+              playAndPause();
+              return;
+            } else {
+              const fileReader = new FileReader();
+              fileReader.readAsDataURL(inpFile.files[0]);
+              fileReader.onload = (e) => {
+                audio.setAttribute("src", e.currentTarget.result);
+                songList.push(inpFile.files[0].name);
+                playAndPause();
+                db.collection("songs").add({
+                  name: inpFile.files[0].name,
+                  data: e.currentTarget.result,
+                });
+                let screen = document.querySelector("#song-option");
+                let ul = document.createElement("ul");
+                screen.innerHTML = "";
+                screen.append(ul);
+                songList.forEach((song, index) => {
+                  let li = document.createElement("li");
+                  li.textContent = song;
+                  ul.append(li);
+                  let removeBtn = document.createElement("button");
+                  removeBtn.innerHTML = `<i class="fa fa-trash" aria-hidden="true"></i>`;
+                  ul.append(li);
+                  ul.append(removeBtn);
+                  removeBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    db.collection("songs")
+                      .doc({ name: song })
+                      .delete()
+                      .then((e) => {
+                        console.log("delete");
+                      })
+                      .catch((e) => {});
+
+                    songList.filter((item) => {
+                      return item !== song;
+                    });
+
+                    delete songList[index];
+
+                    songList.pop();
+
+                    inpFile.files[0].name = "";
+
+                    removeBtn.previousElementSibling.remove();
+                    removeBtn.remove();
+                  });
+                  li.addEventListener("click", (e) => {
+                    db.collection("songs")
+                      .get()
+                      .then((song) => {
+                        audio.setAttribute(
+                          "src",
+                          `audio/${e.target.textContent}`
+                        );
+                        marquee.textContent = e.target.textContent;
+                        song.forEach((song, index) => {
+                          if (e.target.innerHTML.includes(song.name)) {
+                            audio.setAttribute("src", song.data);
+                          }
+                        });
+                        playAndPause();
+                      });
+                  });
+                });
+              };
+            }
+          });
       });
   });
 })();

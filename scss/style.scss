@@ -44,7 +44,6 @@
       #screen-input {
         grid-column: 3 / 4;
         grid-row: 2 / 3;
-        height: 400px;
         background: #000;
         overflow: hidden;
         color: transparent;
@@ -69,10 +68,29 @@
           flex-direction: column;
           overflow-y: scroll;
           overflow-x: hidden;
-
           height: 350px;
+          min-width: 300px;
           ul {
             padding: 0;
+            display: grid;
+            grid-template-columns: 1fr .1fr;
+            button{
+              background: rgb(251, 251, 71);
+              border: 3px solid #000;
+              border-radius: 5px;
+              padding: 5px;
+              &:hover{
+                i{
+                  color: red;
+                }
+              }
+              cursor: pointer;
+              i{
+                color: rgb(248, 124, 8);
+                font-size: 1.3rem;
+
+              }
+            }
             li {
               padding: 5px;
               list-style: none;
@@ -83,6 +101,11 @@
               font-weight: 500;
               font-family: sans-serif;
               line-height: 20px;
+              display: flex;
+              justify-content: space-between;
+              word-break: keep-all;
+              word-wrap: normal;
+              max-width: 250px;
               cursor: pointer;
               &:hover {
                 background: #b1a9a9;
@@ -172,6 +195,26 @@
       width: 100%;
       .left-side {
         width: 95%;
+        grid-template-columns: 1fr ;
+        grid-template-rows: 50px 200px auto;
+        #song-name{
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
+        }
+        #visualizer{
+          grid-column: 1 / 2;
+          grid-row: 3 / 4;
+          height: 200px;
+        }
+        #screen-input{
+          grid-column: 1 / 2;
+          grid-row: 2 / 3;
+          #song-option{
+            height: 180px;
+            padding: 20px 0px;
+          }
+          
+        }
       }
       .right-side {
         width: 90%;
