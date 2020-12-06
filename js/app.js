@@ -26,6 +26,7 @@
       play = false;
     }
   });
+  // removing loding animation
   function removeAnimation(animatedDiv) {
     if (animatedDiv) {
       playBtn.innerHTML = `<i class="fa fa-pause" aria-hidden="true"></i>`;
@@ -37,9 +38,9 @@
   }
 
   function playAndPause(animatedDiv) {
-    if(audio.src.match('undefined')){
-      audio.setAttribute("src","audio/mixkit-hazy-after-hours-132.mp3")
-      marquee.innerText = "mixkit-hazy-after-hours-132.mp3"
+    if (audio.src.match("undefined")) {
+      audio.setAttribute("src", "audio/mixkit-hazy-after-hours-132.mp3");
+      marquee.innerText = "mixkit-hazy-after-hours-132.mp3";
     }
     if (play === false) {
       audio.play().then(async () => {
@@ -100,11 +101,8 @@
                 console.log("delete");
               })
               .catch((e) => {});
-
             delete songList[index];
-
             songList.pop();
-
             removeBtn.previousElementSibling.remove();
             removeBtn.remove();
           });
@@ -128,20 +126,10 @@
       });
   }
   // Adding next and previous funtionality
-  let songList = [
-    "mixkit-hazy-after-hours-132.mp3",
-    "mixkit-hip-hop-02-738.mp3",
-  ];
+  let songList = ["mixkit-hazy-after-hours-132.mp3"];
   const nextBtn = document.querySelector(".next-btn");
   const prevBtn = document.querySelector(".prev-btn");
-  let songCount = 0;
-  // Next button event
-  nextBtn.addEventListener("click", () => {
-    nextSong();
-  });
-  function nextSong() {
-    songCount++;
-    if (songCount > songList.length - 1) songCount = 0;
+  function getSong() {
     let db = new Localbase("db");
     db.collection("songs")
       .get()
@@ -163,33 +151,24 @@
         playAndPause(animatedDiv);
       });
   }
+  let songCount = 0;
+  // Next button event
+  nextBtn.addEventListener("click", () => {
+    nextSong();
+  });
+  function nextSong() {
+    songCount++;
+    if (songCount > songList.length - 1) songCount = 0;
+    getSong();
+  }
   // Prev button event
   prevBtn.addEventListener("click", () => {
     prevSong();
   });
   function prevSong() {
     songCount--;
-    if (songCount < 0) songCount = songList.length - 2;
-    let db = new Localbase("db");
-    db.collection("songs")
-      .get()
-      .then((songs) => {
-        audio.setAttribute("src", `audio/${songList[songCount]}`);
-        let animatedDiv = document.createElement("div");
-        let x = document.querySelector(".left-side");
-        visualizer.style.display = "none";
-        animatedDiv.classList.add("laoding-animation");
-        x.append(animatedDiv);
-        songs.forEach((song, index) => {
-          if (song.name.includes(songList[songCount])) {
-            audio.setAttribute("src", song.data);
-          }
-        });
-        songNameContainer.innerHTML = "";
-        marquee.textContent = songList[songCount];
-        songNameContainer.append(marquee);
-        playAndPause(animatedDiv);
-      });
+    if (songCount < 0) songCount = songList.length - 1;
+    getSong();
   }
   // On load storing song data into song list
   window.onload = () => {
@@ -366,6 +345,7 @@
                             audio.setAttribute("src", song.data);
                           }
                         });
+
                         playAndPause(animatedDiv);
                       });
                   });
@@ -374,5 +354,7 @@
             }
           });
       });
+    marquee.innerText = inpFile.files[0].name;
+    inpFile.files[0].name = "";
   });
 })();
